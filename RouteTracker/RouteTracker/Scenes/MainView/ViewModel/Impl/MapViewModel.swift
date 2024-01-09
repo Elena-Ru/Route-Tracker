@@ -11,6 +11,7 @@ import GoogleMaps
 final class MapViewModel: ObservableObject {
     // MARK: Properties
     @Published var cameraPosition: GMSCameraPosition
+    @Published var marker: GMSMarker?
 
     // MARK: Initializer
     init(
@@ -29,6 +30,10 @@ extension MapViewModel: MapViewModelProtocol {
         let dniproLongitude: CLLocationDegrees = Constants.longitudeDnipro
         let zoomLevel: Float = Constants.zoomDnipro
         cameraPosition = GMSCameraPosition.camera(withLatitude: dniproLatitude, longitude: dniproLongitude, zoom: zoomLevel)
+    }
+    
+    func addMarker(at position: CLLocationCoordinate2D) {
+        marker = GMSMarker(position: position)
     }
 }
 
