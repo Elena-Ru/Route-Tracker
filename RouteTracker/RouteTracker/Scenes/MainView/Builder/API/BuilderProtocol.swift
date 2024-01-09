@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// MARK: - BuilderProtocol
 protocol BuilderProtocol {
     associatedtype view: View
     func toPresent() -> view
