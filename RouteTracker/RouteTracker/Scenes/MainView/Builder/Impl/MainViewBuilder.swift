@@ -8,7 +8,7 @@
 import SwiftUI
 
 // MARK: - Builder
-class MainViewBuilder: BuilderProtocol {
+final class MainViewBuilder: BuilderProtocol {
     func toPresent() -> some View {
         let viewModel = MapViewModel()
         return MainView(viewModel: viewModel) 
