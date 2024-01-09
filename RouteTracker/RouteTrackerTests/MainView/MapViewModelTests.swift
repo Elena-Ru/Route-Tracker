@@ -41,12 +41,12 @@ final class MapViewModelTests: XCTestCase {
     
     func testMapViewModel_WhenMoveToDnipro_ShouldUpdateCameraPositionToDnipro() {
         // When
-        sut.moveToDnipro()
+        sut.moveToTokyo()
         
         // Then
-        XCTAssertEqual(sut.cameraPosition.target.latitude, TestData.latitudeDnipro, "Latitude should be set to Dnipro's latitude.")
-        XCTAssertEqual(sut.cameraPosition.target.longitude, TestData.longitudeDnipro, "Longitude should be set to Dnipro's longitude.")
-        XCTAssertEqual(sut.cameraPosition.zoom, TestData.zoomDnipro, "Zoom should be set to Dnipro's zoom level.")
+        XCTAssertEqual(sut.cameraPosition.target.latitude, TestData.latitudeTokyo, "Latitude should be set to Tokyo's latitude.")
+        XCTAssertEqual(sut.cameraPosition.target.longitude, TestData.longitudeTokyo, "Longitude should be set to Tokyo's longitude.")
+        XCTAssertEqual(sut.cameraPosition.zoom, TestData.zoomTokyo, "Zoom should be set to Tokyo's zoom level.")
     }
 }
 
@@ -55,8 +55,8 @@ private extension MapViewModelTests {
         static let latitudeDefault: CLLocationDegrees = -33.868
         static let longitudeDefault: CLLocationDegrees = 151.2086
         static let zoomDefault: Float = 6
-        static let latitudeDnipro: CLLocationDegrees = 48.4647
-        static let longitudeDnipro: CLLocationDegrees = 35.0462
-        static let zoomDnipro: Float = 17
+        static let latitudeTokyo: CLLocationDegrees = 37.33527476
+        static let longitudeTokyo: CLLocationDegrees = -122.03254703
+        static let zoomTokyo: Float = 17
     }
 }
