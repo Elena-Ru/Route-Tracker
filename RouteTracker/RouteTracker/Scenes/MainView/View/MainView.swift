@@ -15,11 +15,17 @@ struct MainView<VM>: View where VM: MapViewModelProtocol {
        
     var body: some View {
         NavigationView {
-            GoogleMapsView(cameraPosition: $viewModel.cameraPosition)
+            GoogleMapsView(cameraPosition: $viewModel.cameraPosition, marker: $viewModel.marker)
                 .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
+                    ToolbarItem(placement: .topBarTrailing) {
                         Button(Constants.navigateToDnipro) {
                             viewModel.moveToDnipro()
+                        }
+                    }
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button(Constants.addMarker) {
+                            let currentPosition = viewModel.cameraPosition.target
+                            viewModel.addMarker(at: currentPosition)
                         }
                     }
                 }
@@ -36,5 +42,6 @@ struct MainView<VM>: View where VM: MapViewModelProtocol {
 private extension MainView {
     enum Constants {
         static var navigateToDnipro: String { "To Dnipro" }
+        static var addMarker: String { "Marker" }
     }
 }
