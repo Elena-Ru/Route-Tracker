@@ -17,6 +17,7 @@ struct GoogleMapsView: UIViewRepresentable {
         mapView.camera = cameraPosition
         return mapView
     }
+    
     func updateUIView(_ mapView: GMSMapView, context: Context) {
         mapView.animate(to: cameraPosition)
     }
