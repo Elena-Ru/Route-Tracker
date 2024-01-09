@@ -14,7 +14,7 @@ struct RouteTrackerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MainView()
+            MainViewBuilder().toPresent()
         }
     }
 }
