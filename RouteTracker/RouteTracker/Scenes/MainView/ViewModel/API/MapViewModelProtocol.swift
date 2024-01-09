@@ -9,7 +9,7 @@ import GoogleMaps
 // MARK: - MapViewModelProtocol
 protocol MapViewModelProtocol: ObservableObject {
     var cameraPosition: GMSCameraPosition { get set }
-    var marker: GMSMarker? { get set }
-    func moveToDnipro()
+    var markers: [GMSMarker] { get set }
+    func moveToTokyo()
     func addMarker(at position: CLLocationCoordinate2D)
 }

@@ -11,7 +11,7 @@ import GoogleMaps
 // MARK: - GoogleMapsView
 struct GoogleMapsView: UIViewRepresentable {
     @Binding var cameraPosition: GMSCameraPosition
-    @Binding var marker: GMSMarker?
+    @Binding var markers: [GMSMarker]
 
     func makeUIView(context: Context) -> GMSMapView {
         let mapView = GMSMapView.init()
@@ -21,7 +21,6 @@ struct GoogleMapsView: UIViewRepresentable {
     
     func updateUIView(_ mapView: GMSMapView, context: Context) {
         mapView.animate(to: cameraPosition)
-        mapView.clear()
-        marker?.map = mapView
+        markers.last?.map = mapView
     }
 }

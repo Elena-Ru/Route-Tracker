@@ -8,10 +8,12 @@
 import GoogleMaps
 
 // MARK: - MapViewModel
-final class MapViewModel: ObservableObject {
+final class MapViewModel: NSObject, ObservableObject {
+    
     // MARK: Properties
     @Published var cameraPosition: GMSCameraPosition
-    @Published var marker: GMSMarker?
+    @Published var markers: [GMSMarker] = [] 
+    var locationManager: CLLocationManager?
 
     // MARK: Initializer
     init(
@@ -20,20 +22,44 @@ final class MapViewModel: ObservableObject {
         zoom: Float = Constants.zoomDefault
     ) {
         cameraPosition = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: zoom)
+        
+        super.init()
+        locationManager = CLLocationManager()
+        locationManager?.delegate = self
+        locationManager?.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager?.requestWhenInUseAuthorization()
+    }
+}
+
+// MARK: - CLLocationManagerDelegate
+extension MapViewModel: CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.last {
+            DispatchQueue.main.async {
+                self.cameraPosition = GMSCameraPosition.camera(withTarget: location.coordinate, zoom: self.cameraPosition.zoom)
+                let newMarker = GMSMarker(position: location.coordinate)
+                self.markers.append(newMarker)
+            }
+        }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Failed to update location: \(error.localizedDescription)")
     }
 }
 
 // MARK: - MapViewModelProtocol
 extension MapViewModel: MapViewModelProtocol {
-    func moveToDnipro() {
-        let dniproLatitude: CLLocationDegrees = Constants.latitudeDnipro
-        let dniproLongitude: CLLocationDegrees = Constants.longitudeDnipro
-        let zoomLevel: Float = Constants.zoomDnipro
+    func moveToTokyo() {
+        let dniproLatitude: CLLocationDegrees = Constants.latitudeTokyo
+        let dniproLongitude: CLLocationDegrees = Constants.longitudeTokyo
+        let zoomLevel: Float = Constants.zoomTokyo
         cameraPosition = GMSCameraPosition.camera(withLatitude: dniproLatitude, longitude: dniproLongitude, zoom: zoomLevel)
     }
     
     func addMarker(at position: CLLocationCoordinate2D) {
-        marker = GMSMarker(position: position)
+        locationManager?.startUpdatingLocation()
+        markers.append(GMSMarker(position: position))
     }
 }
 
@@ -43,8 +69,8 @@ private extension MapViewModel {
         static let latitudeDefault: CLLocationDegrees = -33.868
         static let longitudeDefault: CLLocationDegrees = 151.2086
         static let zoomDefault: Float = 6
-        static let latitudeDnipro: CLLocationDegrees = 48.4647
-        static let longitudeDnipro: CLLocationDegrees = 35.0462
-        static let zoomDnipro: Float = 17
+        static let latitudeTokyo: CLLocationDegrees = 37.33527476
+        static let longitudeTokyo: CLLocationDegrees = -122.03254703
+        static let zoomTokyo: Float = 17
     }
 }
