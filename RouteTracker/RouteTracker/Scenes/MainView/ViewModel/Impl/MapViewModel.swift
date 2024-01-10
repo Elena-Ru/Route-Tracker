@@ -6,6 +6,7 @@
 //
 
 import GoogleMaps
+import RealmSwift
 
 // MARK: - MapViewModel
 final class MapViewModel: NSObject, ObservableObject {
@@ -71,12 +72,32 @@ extension MapViewModel: MapViewModelProtocol {
     }
     
     func stopTrack() {
-//        route?.map = nil
-//        route = GMSPolyline()
-//        routePath = GMSMutablePath()
-        
-        locationManager?.stopUpdatingLocation()
-    }
+            locationManager?.stopUpdatingLocation()
+            
+            // Предполагая, что у вас уже есть экземпляр Realm и routePath инициализирован.
+            guard let path = routePath else {
+                return
+            }
+            
+            let realm = try! Realm() // Обычно вы обрабатываете ошибки при работе с Realm.
+            
+            try! realm.write {
+                
+                // Удаляем все существующие объекты RoutePoint из Realm
+                let allRoutePoints = realm.objects(RoutePoint.self)
+                realm.delete(allRoutePoints)
+                
+                for index in 0..<path.count() {
+                    let coordinate = path.coordinate(at: index)
+                    let routePoint = RoutePoint(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                    realm.add(routePoint)
+                }
+            }
+            
+            // Сброс или очистка маршрута, если это необходимо
+            routePath = nil
+            route?.map = nil
+        }
 }
 
 // MARK: - Constants
