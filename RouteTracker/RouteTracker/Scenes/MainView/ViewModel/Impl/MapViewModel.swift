@@ -19,9 +19,9 @@ final class MapViewModel: NSObject, ObservableObject {
 
     // MARK: Initializer
     init(
-        latitude: CLLocationDegrees = Constants.latitudeDefault,
-        longitude: CLLocationDegrees = Constants.longitudeDefault,
-        zoom: Float = Constants.zoomDefault
+        latitude: CLLocationDegrees = Constants.latitudeTokyo,
+        longitude: CLLocationDegrees = Constants.longitudeTokyo,
+        zoom: Float = Constants.zoomTokyo
     ) {
         cameraPosition = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: zoom)
         
@@ -62,22 +62,29 @@ extension MapViewModel: MapViewModelProtocol {
         cameraPosition = GMSCameraPosition.camera(withLatitude: dniproLatitude, longitude: dniproLongitude, zoom: zoomLevel)
     }
     
-    func addMarker(at position: CLLocationCoordinate2D) {
+    func startTrack(at position: CLLocationCoordinate2D) {
         route?.map = nil
         route = GMSPolyline()
         routePath = GMSMutablePath()
         
         locationManager?.startUpdatingLocation()
-       // markers.append(GMSMarker(position: position))
+    }
+    
+    func stopTrack() {
+//        route?.map = nil
+//        route = GMSPolyline()
+//        routePath = GMSMutablePath()
+        
+        locationManager?.stopUpdatingLocation()
     }
 }
 
 // MARK: - Constants
 private extension MapViewModel {
     enum Constants {
-        static let latitudeDefault: CLLocationDegrees = -33.868
-        static let longitudeDefault: CLLocationDegrees = 151.2086
-        static let zoomDefault: Float = 6
+//        static let latitudeDefault: CLLocationDegrees = -33.868
+//        static let longitudeDefault: CLLocationDegrees = 151.2086
+//        static let zoomDefault: Float = 6
         static let latitudeTokyo: CLLocationDegrees = 37.33527476
         static let longitudeTokyo: CLLocationDegrees = -122.03254703
         static let zoomTokyo: Float = 17

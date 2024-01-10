@@ -25,9 +25,15 @@ struct MainView<VM>: View where VM: MapViewModelProtocol {
                     }
                     
                     ToolbarItem(placement: .topBarLeading) {
-                        Button(Constants.addMarker) {
-                            let currentPosition = viewModel.cameraPosition.target
-                            viewModel.addMarker(at: currentPosition)
+                        HStack {
+                            Button(Constants.startTrack) {
+                                let currentPosition = viewModel.cameraPosition.target
+                                viewModel.startTrack(at: currentPosition)
+                            }
+                            
+                            Button(Constants.stopTrack) {
+                                viewModel.stopTrack()
+                            }
                         }
                     }
                 }
@@ -44,6 +50,7 @@ struct MainView<VM>: View where VM: MapViewModelProtocol {
 private extension MainView {
     enum Constants {
         static var navigateToTokyo: String { "To Tokyo" }
-        static var addMarker: String { "Marker" }
+        static var startTrack: String { "Start track" }
+        static var stopTrack: String { "Stop track" }
     }
 }

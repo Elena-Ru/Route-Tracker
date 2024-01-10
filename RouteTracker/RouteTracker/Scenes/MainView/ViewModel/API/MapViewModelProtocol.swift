@@ -12,5 +12,6 @@ protocol MapViewModelProtocol: ObservableObject {
     var markers: [GMSMarker] { get set }
     var route: GMSPolyline? { get set }
     func moveToTokyo()
-    func addMarker(at position: CLLocationCoordinate2D)
+    func startTrack(at position: CLLocationCoordinate2D)
+    func stopTrack()
 }
