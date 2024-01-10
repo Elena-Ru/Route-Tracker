@@ -12,6 +12,7 @@ import GoogleMaps
 struct GoogleMapsView: UIViewRepresentable {
     @Binding var cameraPosition: GMSCameraPosition
     @Binding var markers: [GMSMarker]
+    @Binding var route: GMSPolyline?
 
     func makeUIView(context: Context) -> GMSMapView {
         let mapView = GMSMapView.init()
@@ -21,6 +22,6 @@ struct GoogleMapsView: UIViewRepresentable {
     
     func updateUIView(_ mapView: GMSMapView, context: Context) {
         mapView.animate(to: cameraPosition)
-        markers.last?.map = mapView
+        route?.map = mapView
     }
 }

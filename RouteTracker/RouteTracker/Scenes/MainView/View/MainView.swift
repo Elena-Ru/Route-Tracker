@@ -16,13 +16,14 @@ struct MainView<VM>: View where VM: MapViewModelProtocol {
        
     var body: some View {
         NavigationView {
-            GoogleMapsView(cameraPosition: $viewModel.cameraPosition, markers: $viewModel.markers)
+            GoogleMapsView(cameraPosition: $viewModel.cameraPosition, markers: $viewModel.markers, route: $viewModel.route)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(Constants.navigateToTokyo) {
                             viewModel.moveToTokyo()
                         }
                     }
+                    
                     ToolbarItem(placement: .topBarLeading) {
                         Button(Constants.addMarker) {
                             let currentPosition = viewModel.cameraPosition.target
