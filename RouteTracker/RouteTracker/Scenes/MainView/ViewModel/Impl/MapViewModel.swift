@@ -14,6 +14,8 @@ final class MapViewModel: NSObject, ObservableObject {
     @Published var cameraPosition: GMSCameraPosition
     @Published var markers: [GMSMarker] = [] 
     var locationManager: CLLocationManager?
+    @Published var route: GMSPolyline?
+    var routePath: GMSMutablePath?
 
     // MARK: Initializer
     init(
@@ -40,8 +42,8 @@ extension MapViewModel: CLLocationManagerDelegate {
         if let location = locations.last {
             DispatchQueue.main.async {
                 self.cameraPosition = GMSCameraPosition.camera(withTarget: location.coordinate, zoom: self.cameraPosition.zoom)
-                let newMarker = GMSMarker(position: location.coordinate)
-                self.markers.append(newMarker)
+                self.routePath?.add(location.coordinate)
+                self.route?.path = self.routePath
             }
         }
     }
@@ -61,8 +63,12 @@ extension MapViewModel: MapViewModelProtocol {
     }
     
     func addMarker(at position: CLLocationCoordinate2D) {
+        route?.map = nil
+        route = GMSPolyline()
+        routePath = GMSMutablePath()
+        
         locationManager?.startUpdatingLocation()
-        markers.append(GMSMarker(position: position))
+       // markers.append(GMSMarker(position: position))
     }
 }
 
