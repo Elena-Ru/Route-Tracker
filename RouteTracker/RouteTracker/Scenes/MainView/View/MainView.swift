@@ -16,18 +16,30 @@ struct MainView<VM>: View where VM: MapViewModelProtocol {
        
     var body: some View {
         NavigationView {
-            GoogleMapsView(cameraPosition: $viewModel.cameraPosition, markers: $viewModel.markers, route: $viewModel.route)
+            GoogleMapsView(cameraPosition: $viewModel.cameraPosition, lastCameraUpdate: $viewModel.lastCameraUpdate, markers: $viewModel.markers, route: $viewModel.route, needsCameraUpdate: $viewModel.needsCameraUpdate)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button(Constants.navigateToTokyo) {
-                            viewModel.moveToTokyo()
+                        HStack {
+                            Button(Constants.previous) {
+                                viewModel.showPreviousTrack()
+                            }
+                            
+                            Button(Constants.navigateToTokyo) {
+                                viewModel.moveToTokyo()
+                            }
                         }
                     }
                     
                     ToolbarItem(placement: .topBarLeading) {
-                        Button(Constants.addMarker) {
-                            let currentPosition = viewModel.cameraPosition.target
-                            viewModel.addMarker(at: currentPosition)
+                        HStack {
+                            Button(Constants.startTrack) {
+                                let currentPosition = viewModel.cameraPosition.target
+                                viewModel.startTrack(at: currentPosition)
+                            }
+                            
+                            Button(Constants.stopTrack) {
+                                viewModel.stopTrack()
+                            }
                         }
                     }
                 }
@@ -44,6 +56,8 @@ struct MainView<VM>: View where VM: MapViewModelProtocol {
 private extension MainView {
     enum Constants {
         static var navigateToTokyo: String { "To Tokyo" }
-        static var addMarker: String { "Marker" }
+        static var startTrack: String { "Start track" }
+        static var stopTrack: String { "Stop track" }
+        static var previous: String { "Previuos" }
     }
 }

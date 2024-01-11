@@ -11,8 +11,9 @@ import GoogleMaps
 // MARK: - GoogleMapsView
 struct GoogleMapsView: UIViewRepresentable {
     @Binding var cameraPosition: GMSCameraPosition
-    @Binding var markers: [GMSMarker]
+    @Binding var lastCameraUpdate: GMSCameraUpdate?
     @Binding var route: GMSPolyline?
+    @Binding var needsCameraUpdate: Bool
 
     func makeUIView(context: Context) -> GMSMapView {
         let mapView = GMSMapView.init()
@@ -21,7 +22,18 @@ struct GoogleMapsView: UIViewRepresentable {
     }
     
     func updateUIView(_ mapView: GMSMapView, context: Context) {
-        mapView.animate(to: cameraPosition)
-        route?.map = mapView
+        if let cameraUpdate = self.lastCameraUpdate {
+            mapView.animate(with: cameraUpdate)
+            DispatchQueue.main.async {
+                self.lastCameraUpdate = nil
+                self.needsCameraUpdate = false
+            }
+            route?.map = mapView
+            return
+        }
+        if needsCameraUpdate {
+            mapView.animate(to: cameraPosition)
+            route?.map = mapView
+        }
     }
 }
