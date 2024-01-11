@@ -13,10 +13,12 @@ final class MapViewModel: NSObject, ObservableObject {
     
     // MARK: Properties
     @Published var cameraPosition: GMSCameraPosition
-    @Published var markers: [GMSMarker] = [] 
-    var locationManager: CLLocationManager?
+    @Published var lastCameraUpdate: GMSCameraUpdate?
     @Published var route: GMSPolyline?
+    @Published var needsCameraUpdate: Bool = false
     var routePath: GMSMutablePath?
+    var isTracking: Bool = false
+    var locationManager: CLLocationManager?
 
     // MARK: Initializer
     init(
@@ -40,6 +42,8 @@ final class MapViewModel: NSObject, ObservableObject {
 // MARK: - CLLocationManagerDelegate
 extension MapViewModel: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard isTracking else { return }
+
         if let location = locations.last {
             DispatchQueue.main.async {
                 self.cameraPosition = GMSCameraPosition.camera(withTarget: location.coordinate, zoom: self.cameraPosition.zoom)
@@ -60,52 +64,74 @@ extension MapViewModel: MapViewModelProtocol {
         let dniproLatitude: CLLocationDegrees = Constants.latitudeTokyo
         let dniproLongitude: CLLocationDegrees = Constants.longitudeTokyo
         let zoomLevel: Float = Constants.zoomTokyo
-        cameraPosition = GMSCameraPosition.camera(withLatitude: dniproLatitude, longitude: dniproLongitude, zoom: zoomLevel)
+        DispatchQueue.main.async {
+            self.cameraPosition = GMSCameraPosition.camera(withLatitude: dniproLatitude, longitude: dniproLongitude, zoom: zoomLevel)
+        }
     }
     
     func startTrack(at position: CLLocationCoordinate2D) {
+        isTracking = true
+        needsCameraUpdate = true
         route?.map = nil
         route = GMSPolyline()
         routePath = GMSMutablePath()
-        
         locationManager?.startUpdatingLocation()
     }
     
     func stopTrack() {
-            locationManager?.stopUpdatingLocation()
-            
-            // Предполагая, что у вас уже есть экземпляр Realm и routePath инициализирован.
-            guard let path = routePath else {
-                return
-            }
-            
-            let realm = try! Realm() // Обычно вы обрабатываете ошибки при работе с Realm.
-            
-            try! realm.write {
-                
-                // Удаляем все существующие объекты RoutePoint из Realm
-                let allRoutePoints = realm.objects(RoutePoint.self)
-                realm.delete(allRoutePoints)
-                
-                for index in 0..<path.count() {
-                    let coordinate = path.coordinate(at: index)
-                    let routePoint = RoutePoint(latitude: coordinate.latitude, longitude: coordinate.longitude)
-                    realm.add(routePoint)
-                }
-            }
-            
-            // Сброс или очистка маршрута, если это необходимо
-            routePath = nil
-            route?.map = nil
+        locationManager?.stopUpdatingLocation()
+        isTracking = false
+        
+        guard let path = routePath else {
+            return
         }
+        
+        let realm = try! Realm()
+        
+        try! realm.write {
+            
+            let allRoutePoints = realm.objects(RoutePoint.self)
+            realm.delete(allRoutePoints)
+            
+            for index in 0..<path.count() {
+                let coordinate = path.coordinate(at: index)
+                let routePoint = RoutePoint(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                realm.add(routePoint)
+            }
+        }
+        
+        routePath = nil
+        route?.map = nil
+    }
+    
+    func showPreviousTrack() {
+        let realm = try! Realm()
+        
+        let savedRoutePoints = realm.objects(RoutePoint.self)
+        
+        let path = GMSMutablePath()
+        savedRoutePoints.forEach { routePoint in
+            path.add(CLLocationCoordinate2D(latitude: routePoint.latitude, longitude: routePoint.longitude))
+        }
+        
+        if path.count() > 0 {
+            DispatchQueue.main.async {
+                let polyline = GMSPolyline(path: path)
+                self.route = polyline
+                
+                let bounds = GMSCoordinateBounds(path: path)
+                let update = GMSCameraUpdate.fit(bounds, withPadding: 50)
+                
+                self.lastCameraUpdate = update 
+                self.needsCameraUpdate = true
+            }
+        }
+    }
 }
 
 // MARK: - Constants
 private extension MapViewModel {
     enum Constants {
-//        static let latitudeDefault: CLLocationDegrees = -33.868
-//        static let longitudeDefault: CLLocationDegrees = 151.2086
-//        static let zoomDefault: Float = 6
         static let latitudeTokyo: CLLocationDegrees = 37.33527476
         static let longitudeTokyo: CLLocationDegrees = -122.03254703
         static let zoomTokyo: Float = 17

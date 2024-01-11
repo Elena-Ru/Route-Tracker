@@ -16,11 +16,17 @@ struct MainView<VM>: View where VM: MapViewModelProtocol {
        
     var body: some View {
         NavigationView {
-            GoogleMapsView(cameraPosition: $viewModel.cameraPosition, markers: $viewModel.markers, route: $viewModel.route)
+            GoogleMapsView(cameraPosition: $viewModel.cameraPosition, lastCameraUpdate: $viewModel.lastCameraUpdate, markers: $viewModel.markers, route: $viewModel.route, needsCameraUpdate: $viewModel.needsCameraUpdate)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button(Constants.navigateToTokyo) {
-                            viewModel.moveToTokyo()
+                        HStack {
+                            Button(Constants.previous) {
+                                viewModel.showPreviousTrack()
+                            }
+                            
+                            Button(Constants.navigateToTokyo) {
+                                viewModel.moveToTokyo()
+                            }
                         }
                     }
                     
@@ -52,5 +58,6 @@ private extension MainView {
         static var navigateToTokyo: String { "To Tokyo" }
         static var startTrack: String { "Start track" }
         static var stopTrack: String { "Stop track" }
+        static var previous: String { "Previuos" }
     }
 }
