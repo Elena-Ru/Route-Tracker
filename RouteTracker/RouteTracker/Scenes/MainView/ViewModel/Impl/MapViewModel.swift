@@ -67,6 +67,7 @@ extension MapViewModel: MapViewModelProtocol {
         needsCameraUpdate = true
         route?.map = nil
         route = GMSPolyline()
+        customizeRoute(polyline: route ?? GMSPolyline())
         routePath = GMSMutablePath()
         locationManager?.startUpdatingLocation()
     }
@@ -95,6 +96,7 @@ extension MapViewModel: MapViewModelProtocol {
             if path.count() > .zero {
                 DispatchQueue.main.async {
                     let polyline = GMSPolyline(path: path)
+                    self.customizeRoute(polyline: polyline)
                     self.route = polyline
                     
                     let bounds = GMSCoordinateBounds(path: path)
@@ -108,11 +110,19 @@ extension MapViewModel: MapViewModelProtocol {
     }
 }
 
+private extension MapViewModel {
+    func customizeRoute(polyline: GMSPolyline) {
+        polyline.strokeWidth = Constants.routeWidth
+        polyline.strokeColor = .cyan
+    }
+}
+
 // MARK: - Constants
 private extension MapViewModel {
     enum Constants {
         static let latitudeTokyo: CLLocationDegrees = 37.33527476
         static let longitudeTokyo: CLLocationDegrees = -122.03254703
         static let zoomTokyo: Float = 17
+        static let routeWidth: CGFloat = 5.0
     }
 }
