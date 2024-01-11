@@ -8,7 +8,10 @@
 import SwiftUI
 
 // MARK: - LoginView
-struct LoginView: View {
+struct LoginView<VM>: View where VM: LoginViewModelProtocol {
+    
+    // MARK: Properties
+    @ObservedObject var viewModel: VM
     // MARK: Properties
     @State private var username: String = ""
     @State private var password: String = ""
@@ -34,6 +37,7 @@ struct LoginView: View {
                     else {
                         return
                     }
+                    UserDefaults.standard.setValue(true, forKey: "isLogin")
                     print("login")
                 }
                 .padding()
@@ -51,17 +55,17 @@ struct LoginView: View {
 // MARK: - Constants
 private extension LoginView {
     enum Constants {
-        static let cornerRadius: CGFloat = 10
-        static let secondaryButtonTitle: String = "Recover password"
-        static let userName: String = "11"
-        static let password: String = "111"
-        static let primaryButtonTitle: String = "Login"
-        static let passwordPlaceholder: String = "Password"
-        static let loginPlaceholder: String = "User login"
+        static var cornerRadius: CGFloat { 10 }
+        static var secondaryButtonTitle: String { "Recover password" }
+        static var userName: String { "11" }
+        static var password: String { "111" }
+        static var primaryButtonTitle: String { "Login" }
+        static var passwordPlaceholder: String { "Password" }
+        static var loginPlaceholder: String { "User login" }
     }
 }
 
 // MARK: - Preview
 #Preview {
-    LoginView()
+    LoginView(viewModel: LoginViewModel())
 }

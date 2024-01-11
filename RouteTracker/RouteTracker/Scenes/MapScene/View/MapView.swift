@@ -50,11 +50,6 @@ struct MapView<VM>: View where VM: MapViewModelProtocol {
     }
 }
 
-// MARK: - Preview
-#Preview {
-    MapView(viewModel: MapViewModel())
-}
-
 // MARK: - Constants
 private extension MapView {
     enum Constants {
@@ -65,4 +60,9 @@ private extension MapView {
         static var alertTitle: String { "Tracking is active" }
         static var alertMessage: String { "Tracking must be stopped first." }
     }
+}
+
+// MARK: - Preview
+#Preview {
+    MapView(viewModel: MapViewModel())
 }

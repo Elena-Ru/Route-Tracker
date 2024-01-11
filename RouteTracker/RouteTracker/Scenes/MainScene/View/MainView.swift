@@ -8,7 +8,11 @@
 import SwiftUI
 
 // MARK: - MainView
-struct MainView: View {
+struct MainView<VM>: View where VM: MainViewModelProtocol {
+    
+    // MARK: Properties
+    @ObservedObject var viewModel: VM
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -22,6 +26,7 @@ struct MainView: View {
                 .cornerRadius(Constants.cornerRadius)
                 
                 Button(Constants.secondaryButtonTitle) {
+                    UserDefaults.standard.setValue(false, forKey: "isLogin")
                     print("exit")
                 }
                 .padding()
@@ -33,13 +38,13 @@ struct MainView: View {
 // MARK: - Constants
 private extension MainView {
     enum Constants {
-        static let cornerRadius: CGFloat = 10
-        static let secondaryButtonTitle: String = "Exit"
-        static let primaryButtonTitle: String = "Show the Map"
+        static var cornerRadius: CGFloat { 10 }
+        static var secondaryButtonTitle: String { "Exit" }
+        static var primaryButtonTitle: String { "Show the Map" }
     }
 }
 
 // MARK: - Preview
 #Preview {
-    MainView()
+    MainView(viewModel: MainViewModel())
 }

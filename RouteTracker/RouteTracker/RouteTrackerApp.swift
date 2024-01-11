@@ -14,7 +14,11 @@ struct RouteTrackerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MapViewBuilder().toPresent()
+            if UserDefaults.standard.bool(forKey: "isLogin") {
+                MainViewBuilder().toPresent()
+            } else {
+                LoginViewBuilder().toPresent()
+            }
         }
     }
 }
