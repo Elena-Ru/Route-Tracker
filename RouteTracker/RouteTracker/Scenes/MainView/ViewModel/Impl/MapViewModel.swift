@@ -6,39 +6,51 @@
 //
 
 import GoogleMaps
+import RealmSwift
 
 // MARK: - MapViewModel
 final class MapViewModel: NSObject, ObservableObject {
     
     // MARK: Properties
     @Published var cameraPosition: GMSCameraPosition
-    @Published var markers: [GMSMarker] = [] 
+    @Published var lastCameraUpdate: GMSCameraUpdate?
+    @Published var route: GMSPolyline?
+    @Published var needsCameraUpdate: Bool = false
+    @Published var showAlert: Bool = false
+    var routePath: GMSMutablePath?
+    var isTracking: Bool = false
     var locationManager: CLLocationManager?
+    var routeStorageService = RealmService()
 
     // MARK: Initializer
     init(
-        latitude: CLLocationDegrees = Constants.latitudeDefault,
-        longitude: CLLocationDegrees = Constants.longitudeDefault,
-        zoom: Float = Constants.zoomDefault
+        latitude: CLLocationDegrees = Constants.latitudeTokyo,
+        longitude: CLLocationDegrees = Constants.longitudeTokyo,
+        zoom: Float = Constants.zoomTokyo
     ) {
         cameraPosition = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: zoom)
         
         super.init()
         locationManager = CLLocationManager()
         locationManager?.delegate = self
-        locationManager?.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager?.requestWhenInUseAuthorization()
+        locationManager?.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+        locationManager?.allowsBackgroundLocationUpdates = true
+        locationManager?.pausesLocationUpdatesAutomatically = false
+        locationManager?.startMonitoringSignificantLocationChanges()
+        locationManager?.requestAlwaysAuthorization()
     }
 }
 
 // MARK: - CLLocationManagerDelegate
 extension MapViewModel: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard isTracking else { return }
+
         if let location = locations.last {
             DispatchQueue.main.async {
                 self.cameraPosition = GMSCameraPosition.camera(withTarget: location.coordinate, zoom: self.cameraPosition.zoom)
-                let newMarker = GMSMarker(position: location.coordinate)
-                self.markers.append(newMarker)
+                self.routePath?.add(location.coordinate)
+                self.route?.path = self.routePath
             }
         }
     }
@@ -50,27 +62,67 @@ extension MapViewModel: CLLocationManagerDelegate {
 
 // MARK: - MapViewModelProtocol
 extension MapViewModel: MapViewModelProtocol {
-    func moveToTokyo() {
-        let dniproLatitude: CLLocationDegrees = Constants.latitudeTokyo
-        let dniproLongitude: CLLocationDegrees = Constants.longitudeTokyo
-        let zoomLevel: Float = Constants.zoomTokyo
-        cameraPosition = GMSCameraPosition.camera(withLatitude: dniproLatitude, longitude: dniproLongitude, zoom: zoomLevel)
+    func startTrack(at position: CLLocationCoordinate2D) {
+        isTracking = true
+        needsCameraUpdate = true
+        route?.map = nil
+        route = GMSPolyline()
+        customizeRoute(polyline: route ?? GMSPolyline())
+        routePath = GMSMutablePath()
+        locationManager?.startUpdatingLocation()
     }
     
-    func addMarker(at position: CLLocationCoordinate2D) {
-        locationManager?.startUpdatingLocation()
-        markers.append(GMSMarker(position: position))
+    func stopTrack() {
+        locationManager?.stopUpdatingLocation()
+        isTracking = false
+        
+        guard let path = routePath else {
+            return
+        }
+        
+        routeStorageService.saveRoute(path)
+        
+        routePath = nil
+        route?.map = nil
+    }
+    
+    func showPreviousTrack() {
+        if isTracking {
+            showAlert = true
+        } else {
+            showAlert = false
+            guard let path = routeStorageService.loadRoute() else { return }
+            
+            if path.count() > .zero {
+                DispatchQueue.main.async {
+                    let polyline = GMSPolyline(path: path)
+                    self.customizeRoute(polyline: polyline)
+                    self.route = polyline
+                    
+                    let bounds = GMSCoordinateBounds(path: path)
+                    let update = GMSCameraUpdate.fit(bounds, withPadding: 50)
+                    
+                    self.lastCameraUpdate = update 
+                    self.needsCameraUpdate = true
+                }
+            }
+        }
+    }
+}
+
+private extension MapViewModel {
+    func customizeRoute(polyline: GMSPolyline) {
+        polyline.strokeWidth = Constants.routeWidth
+        polyline.strokeColor = .cyan
     }
 }
 
 // MARK: - Constants
 private extension MapViewModel {
     enum Constants {
-        static let latitudeDefault: CLLocationDegrees = -33.868
-        static let longitudeDefault: CLLocationDegrees = 151.2086
-        static let zoomDefault: Float = 6
         static let latitudeTokyo: CLLocationDegrees = 37.33527476
         static let longitudeTokyo: CLLocationDegrees = -122.03254703
         static let zoomTokyo: Float = 17
+        static let routeWidth: CGFloat = 5.0
     }
 }

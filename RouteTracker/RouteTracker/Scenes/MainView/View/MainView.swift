@@ -16,19 +16,35 @@ struct MainView<VM>: View where VM: MapViewModelProtocol {
        
     var body: some View {
         NavigationView {
-            GoogleMapsView(cameraPosition: $viewModel.cameraPosition, markers: $viewModel.markers)
+            GoogleMapsView(cameraPosition: $viewModel.cameraPosition, lastCameraUpdate: $viewModel.lastCameraUpdate, route: $viewModel.route, needsCameraUpdate: $viewModel.needsCameraUpdate)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button(Constants.navigateToTokyo) {
-                            viewModel.moveToTokyo()
-                        }
+                            Button(Constants.previous) {
+                                viewModel.showPreviousTrack()
+                            }
                     }
+                    
                     ToolbarItem(placement: .topBarLeading) {
-                        Button(Constants.addMarker) {
-                            let currentPosition = viewModel.cameraPosition.target
-                            viewModel.addMarker(at: currentPosition)
+                        HStack {
+                            Button(Constants.startTrack) {
+                                let currentPosition = viewModel.cameraPosition.target
+                                viewModel.startTrack(at: currentPosition)
+                            }
+                            
+                            Button(Constants.stopTrack) {
+                                viewModel.stopTrack()
+                            }
                         }
                     }
+                }
+                .alert(isPresented: $viewModel.showAlert) {
+                    Alert(
+                        title: Text(Constants.alertTitle),
+                        message: Text(Constants.alertMessage),
+                        dismissButton: .default(Text(Constants.ok), action: {
+                            viewModel.stopTrack()
+                        })
+                    )
                 }
         }
     }
@@ -42,7 +58,11 @@ struct MainView<VM>: View where VM: MapViewModelProtocol {
 // MARK: - Constants
 private extension MainView {
     enum Constants {
-        static var navigateToTokyo: String { "To Tokyo" }
-        static var addMarker: String { "Marker" }
+        static var startTrack: String { "Start track" }
+        static var stopTrack: String { "Stop track" }
+        static var previous: String { "Previuos" }
+        static var ok: String { "Ok" }
+        static var alertTitle: String { "Tracking is active" }
+        static var alertMessage: String { "Tracking must be stopped first." }
     }
 }
