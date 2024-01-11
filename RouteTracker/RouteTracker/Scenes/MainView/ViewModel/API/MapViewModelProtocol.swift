@@ -12,7 +12,7 @@ protocol MapViewModelProtocol: ObservableObject {
     var lastCameraUpdate: GMSCameraUpdate? { get set }
     var needsCameraUpdate: Bool { get set }
     var route: GMSPolyline? { get set }
-    func moveToTokyo()
+    var showAlert: Bool { get set }
     func startTrack(at position: CLLocationCoordinate2D)
     func stopTrack()
     func showPreviousTrack()

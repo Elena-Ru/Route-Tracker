@@ -16,9 +16,11 @@ final class MapViewModel: NSObject, ObservableObject {
     @Published var lastCameraUpdate: GMSCameraUpdate?
     @Published var route: GMSPolyline?
     @Published var needsCameraUpdate: Bool = false
+    @Published var showAlert: Bool = false
     var routePath: GMSMutablePath?
     var isTracking: Bool = false
     var locationManager: CLLocationManager?
+    var routeStorageService = RealmService()
 
     // MARK: Initializer
     init(
@@ -60,15 +62,6 @@ extension MapViewModel: CLLocationManagerDelegate {
 
 // MARK: - MapViewModelProtocol
 extension MapViewModel: MapViewModelProtocol {
-    func moveToTokyo() {
-        let dniproLatitude: CLLocationDegrees = Constants.latitudeTokyo
-        let dniproLongitude: CLLocationDegrees = Constants.longitudeTokyo
-        let zoomLevel: Float = Constants.zoomTokyo
-        DispatchQueue.main.async {
-            self.cameraPosition = GMSCameraPosition.camera(withLatitude: dniproLatitude, longitude: dniproLongitude, zoom: zoomLevel)
-        }
-    }
-    
     func startTrack(at position: CLLocationCoordinate2D) {
         isTracking = true
         needsCameraUpdate = true
@@ -86,44 +79,30 @@ extension MapViewModel: MapViewModelProtocol {
             return
         }
         
-        let realm = try! Realm()
-        
-        try! realm.write {
-            
-            let allRoutePoints = realm.objects(RoutePoint.self)
-            realm.delete(allRoutePoints)
-            
-            for index in 0..<path.count() {
-                let coordinate = path.coordinate(at: index)
-                let routePoint = RoutePoint(latitude: coordinate.latitude, longitude: coordinate.longitude)
-                realm.add(routePoint)
-            }
-        }
+        routeStorageService.saveRoute(path)
         
         routePath = nil
         route?.map = nil
     }
     
     func showPreviousTrack() {
-        let realm = try! Realm()
-        
-        let savedRoutePoints = realm.objects(RoutePoint.self)
-        
-        let path = GMSMutablePath()
-        savedRoutePoints.forEach { routePoint in
-            path.add(CLLocationCoordinate2D(latitude: routePoint.latitude, longitude: routePoint.longitude))
-        }
-        
-        if path.count() > 0 {
-            DispatchQueue.main.async {
-                let polyline = GMSPolyline(path: path)
-                self.route = polyline
-                
-                let bounds = GMSCoordinateBounds(path: path)
-                let update = GMSCameraUpdate.fit(bounds, withPadding: 50)
-                
-                self.lastCameraUpdate = update 
-                self.needsCameraUpdate = true
+        if isTracking {
+            showAlert = true
+        } else {
+            showAlert = false
+            guard let path = routeStorageService.loadRoute() else { return }
+            
+            if path.count() > .zero {
+                DispatchQueue.main.async {
+                    let polyline = GMSPolyline(path: path)
+                    self.route = polyline
+                    
+                    let bounds = GMSCoordinateBounds(path: path)
+                    let update = GMSCameraUpdate.fit(bounds, withPadding: 50)
+                    
+                    self.lastCameraUpdate = update 
+                    self.needsCameraUpdate = true
+                }
             }
         }
     }
