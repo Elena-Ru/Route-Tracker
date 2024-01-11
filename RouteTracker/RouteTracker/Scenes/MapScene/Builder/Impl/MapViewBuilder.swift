@@ -8,9 +8,9 @@
 import SwiftUI
 
 // MARK: - Builder
-final class MainViewBuilder: BuilderProtocol {
+final class MapViewBuilder: BuilderProtocol {
     func toPresent() -> some View {
         let viewModel = MapViewModel()
-        return MainView(viewModel: viewModel) 
+        return MapView(viewModel: viewModel) 
     }
 }

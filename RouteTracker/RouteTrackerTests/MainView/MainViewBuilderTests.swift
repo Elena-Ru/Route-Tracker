@@ -13,12 +13,12 @@ import SwiftUI
 final class MainViewBuilderTests: XCTestCase {
     
     // MARK: Properties
-    private var sut: MainViewBuilder!
+    private var sut: MapViewBuilder!
 
     // MARK: Lifecycle
     override func setUp() {
         super.setUp()
-        sut = MainViewBuilder()
+        sut = MapViewBuilder()
     }
     
     override func tearDown() {
@@ -33,7 +33,7 @@ final class MainViewBuilderTests: XCTestCase {
         
         // Then
         XCTAssertNotNil(view, "The view should not be nil")
-        XCTAssertTrue(view is MainView<MapViewModel>, "Returned view should be of type MainView<MapViewModel>")
+        XCTAssertTrue(view is MapView<MapViewModel>, "Returned view should be of type MainView<MapViewModel>")
     }
     
     func testMainViewBuilder_toPresent_ShouldReturnInstanceOfMainView() {
@@ -42,12 +42,12 @@ final class MainViewBuilderTests: XCTestCase {
 
            // Then
            XCTAssertNotNil(view, "The builder should always return an instance of MainView.")
-           XCTAssertTrue(view is MainView<MapViewModel>, "The view returned by the builder should be an instance of MainView<MapViewModel>.")
+           XCTAssertTrue(view is MapView<MapViewModel>, "The view returned by the builder should be an instance of MainView<MapViewModel>.")
        }
        
     func testMainViewBuilder_toPresent_ShouldSetUpViewModelCorrectly() {
         // When
-        let view = sut.toPresent() as? MainView<MapViewModel>
+        let view = sut.toPresent() as? MapView<MapViewModel>
         
         // Then
         XCTAssertNotNil(view?.viewModel, "The MainView instance should have a non-nil ViewModel.")

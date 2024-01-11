@@ -61,7 +61,7 @@ private extension LoginView {
     }
 }
 
-// MARK: - LoginView
+// MARK: - Preview
 #Preview {
     LoginView()
 }

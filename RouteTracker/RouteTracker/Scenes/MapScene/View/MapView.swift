@@ -9,7 +9,7 @@ import SwiftUI
 import CoreLocation
 
 // MARK: - MainView
-struct MainView<VM>: View where VM: MapViewModelProtocol {
+struct MapView<VM>: View where VM: MapViewModelProtocol {
     
     // MARK: Properties
     @ObservedObject var viewModel: VM
@@ -52,11 +52,11 @@ struct MainView<VM>: View where VM: MapViewModelProtocol {
 
 // MARK: - Preview
 #Preview {
-    MainView(viewModel: MapViewModel())
+    MapView(viewModel: MapViewModel())
 }
 
 // MARK: - Constants
-private extension MainView {
+private extension MapView {
     enum Constants {
         static var startTrack: String { "Start track" }
         static var stopTrack: String { "Stop track" }
